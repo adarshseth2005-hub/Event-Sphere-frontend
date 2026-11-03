@@ -1,13 +1,16 @@
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ArrowRight, Calendar, ChevronLeft, ChevronRight, MapPin, Sparkles } from 'lucide-react'
 import { Badge } from './ui/badge'
 import { Link } from 'react-router'
 import { Button } from './ui/button'
 
 function FeaturedCarousel({ events }) {
-    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ stopOnInteraction: false, stopOnMouseEnter : true, rootNode : (emblaroot)=> emblaroot.parentElement })])
+
+    const [selectedIndex, setSelectedIndex] = useState(0);
+
+    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({ stopOnInteraction: false, stopOnMouseEnter: true, rootNode: (emblaroot) => emblaroot.parentElement })])
 
     const goToPrev = () => {
         emblaApi?.scrollPrev()
@@ -18,9 +21,16 @@ function FeaturedCarousel({ events }) {
         emblaApi.plugins().autoplay.reset();
     }
 
+    const scrollTo = (i)=>{
+        emblaApi.scrollTo(i);
+    }
+
+    
+
     useEffect(() => {
         if (!emblaApi) return;
-        // emblaApi.plugins().autoplay?.play();
+        
+        emblaApi.on("select", ()=> setSelectedIndex(emblaApi.selectedScrollSnap()))
     }, [emblaApi]);
 
     return (
@@ -138,7 +148,7 @@ function FeaturedCarousel({ events }) {
             >
                 <ChevronLeft className="w-6 h-6" />
             </button>
-            
+
             <button
                 onClick={goToNext}
                 aria-label="Next slide"
@@ -146,6 +156,16 @@ function FeaturedCarousel({ events }) {
             >
                 <ChevronRight className="w-6 h-6" />
             </button>
+
+            <div className="absolute bottom-4 right-6 flex items-center gap-2 z-20">
+                {events.map((_,i) => (
+                    <button
+                        key={i}
+                        onClick={()=>scrollTo(i)}
+                        className={`transition-all rounded-full ${i === selectedIndex ? "w-6 h-2 bg-[#E65100]" : "w-2 h-2 bg-white/50 hover:bg-white/80"}`}
+                    />
+                ))}
+            </div>
         </div>
     )
 }
