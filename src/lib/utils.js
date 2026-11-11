@@ -10,7 +10,6 @@ export function formatPrice(amount, currency = "INR"){
 }
 
 export function formatEventDate(dateInput){
-
     
     const date = parseISO(dateInput);
 
