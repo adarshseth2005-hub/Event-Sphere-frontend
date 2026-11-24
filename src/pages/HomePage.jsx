@@ -1,12 +1,11 @@
 import Skeleton from "@/components/common/Skeleton";
 import EventCard from "@/components/events/EventCard";
-import FeaturedCarousel from "@/components/FeaturedCarousel";
+import FeaturedCarousel from "@/components/events/FeaturedCarousel";
 import { Button } from "@/components/ui/button"
-import axios from "axios";
+import api from "@/lib/axios";
 import { ArrowRight, Briefcase, ChevronRight, Compass, Cpu, Flame, GraduationCap, Laptop, MapPin, Music, Palette, Sparkles, Tag, Trophy } from "lucide-react"
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
-
 
 function getCategoryIconComponent(category) {
     const icon = category?.icon || "";
@@ -96,20 +95,20 @@ function HomePage() {
         async function loadHomePage() {
             setIsLoading(true)
             try {
-                let { data: { data } } = await axios.get("https://eventsphere-server-mfdb.onrender.com/api/events/featured")
+                let { data: { data } } = await api.get("/api/events/featured")
 
                 setFeaturedEvents(data);
             }
             catch (error) { }
             try {
-                let { data: { data } } = await axios.get("https://eventsphere-server-mfdb.onrender.com/api/categories")
+                let { data: { data } } = await api.get("/api/categories")
 
                 setCategories(data);
             }
             catch (error) { }
 
             try {
-                let { data: { data } } = await axios.get("https://eventsphere-server-mfdb.onrender.com/api/events?limit=8&sort=startDate&order=asc")
+                let { data: { data } } = await api.get("/api/events?limit=8&sort=startDate&order=asc")
 
                 setTrendingEvents(data);
             }
@@ -203,9 +202,16 @@ function HomePage() {
 
                 {isLoading ?
                     (<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5">
-                        {Array(6).map((_, i) => (
-                            <div key={i} className="">
-
+                        {[...Array(6)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="p-4 rounded-2xl bg-white border border-[#EBE8DF] animate-pulse space-y-3"
+                            >
+                                <div className="w-9 h-9 rounded-xl bg-stone-100" />
+                                <div className="space-y-1.5">
+                                    <div className="h-3.5 bg-stone-100 rounded w-3/4" />
+                                    <div className="h-2.5 bg-stone-100 rounded w-1/2" />
+                                </div>
                             </div>
                         ))}
                     </div>)
@@ -255,20 +261,20 @@ function HomePage() {
                         className="inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3 py-1.5 text-xs rounded-lg font-medium border border-[#CCC8BA] bg-transparent hover:bg-[#F2F1EC] text-[#222]"
                     >
                         <span>View All Events</span>
-                        <ArrowRight className="w-6 h-4"/>
+                        <ArrowRight className="w-6 h-4" />
                     </Link>
                 </div>
 
                 {isLoading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {[...Array(4)].map((_,i)=>(<Skeleton/>))}
+                        {[...Array(4)].map((_, i) => (<Skeleton key={i} />))}
 
                     </div>
-                ) :(<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                ) : (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {
                         trendingEvents.map((e) => {
                             return (
-                                <EventCard key={e._id} event={e}/>
+                                <EventCard key={e._id} event={e} />
                             )
                         })
                     }
