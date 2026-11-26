@@ -1,17 +1,40 @@
 import { formatEventDate, formatPrice } from "@/lib/utils";
+import { toggleFavorites } from "@/store/slices/favoriteSlice";
 import { format } from "date-fns";
 import { Bookmark, Calendar } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router";
+import { toast } from "sonner";
 
-export default function EventCard({event}) {
-  const {city, currency, slug , price, startDate, title, category : {name}, image , format} = event;
+
+export function handleFavorite(e, event, dispatch , isFavorite) {
+  e.preventDefault();
+  dispatch(toggleFavorites(event));
+  if(!isFavorite){
+    toast.success(`Saved "${event?.title}" to your collection!`)
+  }
+  else{
+    toast.info(`Removed "${event?.title}" from your saved events`)
+  }
+}
+
+
+export default function EventCard({ event }) {
+  const { city, currency, slug, price, startDate, title, category: { name }, image, format } = event;
+
+
+  const dispatch = useDispatch();
+  const isFavorite = useSelector((store) => store.favorites.items.some((e) => (e.id || e._id) === (event.id || event._id)))
+
+
+
   return (
     <Link
       to={`/events/${slug}`}
       className="group bg-white rounded-2xl border border-[#EAE7DC] overflow-hidden flex flex-col justify-between shadow-[0_2px_8px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.08)] hover:border-[#D5D0C2] hover:-translate-y-0.5 transition-all duration-300"
     >
       <div>
-  
+
         <div className="relative aspect-16/10 overflow-hidden bg-stone-100">
           <img
             src={image}
@@ -27,10 +50,14 @@ export default function EventCard({event}) {
 
             {/* Bookmark button */}
             <button
+              onClick={(e) => handleFavorite(e, event, dispatch, isFavorite)}
               type="button"
               className="pointer-events-auto w-8 h-8 rounded-full bg-white/90 backdrop-blur-md shadow-sm border border-black/5 flex items-center justify-center hover:bg-white hover:scale-110 active:scale-95 transition-all text-stone-700 hover:text-stone-900 cursor-pointer text-xs"
             >
-              <Bookmark/>
+              <Bookmark className={`w-4 h-4 transition-colors ${isFavorite
+                  ? "fill-[#E65100] text-[#E65100]"
+                  : "text-stone-600"
+                }`} />
             </button>
           </div>
         </div>
@@ -39,7 +66,7 @@ export default function EventCard({event}) {
         <div className="p-4 space-y-2">
 
           <div className="flex items-center gap-2 text-xs font-semibold text-[#C2410C]">
-            <Calendar className="w-4 h-4"/>
+            <Calendar className="w-4 h-4" />
             <span>{formatEventDate(startDate)}</span>
             <span className="text-stone-300 font-normal">•</span>
             <span className="text-stone-500 font-normal truncate">{city}</span>
